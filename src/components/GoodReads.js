@@ -68,24 +68,26 @@ class GoodreadsCard extends Component {
                     <div className="card-content">
                         <div className="row" >
                             <table>
-                                <tr>
-                                    <td width={ 100 }>Author :</td>
-                                    <td width={ 200 }>
-                                        <span> { author }</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td width={ 100 } >Title :</td>
-                                    <td width={ 200 }>
-                                        <span> { title }</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td width={ 100 } >Mark :</td>
-                                    <td width={ 200 }>
-                                        <span> { mark }</span>
-                                    </td>
-                                </tr>
+                                <tbody>
+                                    <tr>
+                                        <td width={ 100 }>Author :</td>
+                                        <td width={ 200 }>
+                                            <span> { author }</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width={ 100 } >Title :</td>
+                                        <td width={ 200 }>
+                                            <span> { title }</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width={ 100 } >Mark :</td>
+                                        <td width={ 200 }>
+                                            <span> { mark }</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
 
                         </div>

@@ -37,11 +37,11 @@ class App extends Component {
                     <img src={ logo } className="App-logo" alt="logo" />
                 </div>
 
+                <div className="body">
+                    <img alt="" className="book-img" />
+                </div>
 
                 <div className="App-content">
-                    <body>
-                        <img alt="" className="book-img" />
-                    </body>
 
 
                     <div className="center-align">
