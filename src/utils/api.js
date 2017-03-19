@@ -1,17 +1,11 @@
 import * as request from 'request-promise'
 
 
-/* FREE JSON API EXAMPLE */
-
-/* WEATHER: https://www.apixu.com/api-explorer.aspx */
-
-/* IMAGES: https://pixabay.com/api/docs/ */
+/* Goodreads API */
 
 export const ENDPOINTS = {
-
-    WEATHER_API_URL: 'http://api.apixu.com/v1/current.json',
-    PIXABAY_API_URL: 'https://pixabay.com/api/'
-
+    //Find an author with a title
+    GOODREADS_API_URL: 'https://cors-anywhere.herokuapp.com/https://www.goodreads.com/search/index.xml',
 }
 
 /* REQUEST (Promise) DOCUMENTATION */
@@ -25,5 +19,5 @@ export function get( url, queryParameters ) {
         json: true,
         uri: url,
         qs: queryParameters
-    })
+    } )
 }

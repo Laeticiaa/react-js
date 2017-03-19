@@ -1,14 +1,14 @@
 /* ROOT Component of your App  */
-
 import React, { Component } from 'react'
-import logo from './logo.svg'
+import logo from './open-book.svg'
 import './App.css'
+import picture from './Book_Image1.jpg'
 
-import defaultPicture from './components/img/default.jpg'
 
 const Materialize = window.Materialize
+var xmlToJSON = window.xmlToJSON
 
-const APP_TITLE = 'Awesome App'
+const APP_TITLE = 'Who wrote it?'
 //update document title (displayed in the opened browser tab)
 document.title = APP_TITLE
 
@@ -16,104 +16,101 @@ document.title = APP_TITLE
 import { get, ENDPOINTS } from './utils/api'
 
 //components
-import WeatherCard from './components/WeatherCard'
+import GoodreadsCard from './components/GoodReads'
 
 class App extends Component {
-
-    /* React state initialization DOCUMENTATION : https://facebook.github.io/react/docs/react-without-es6.html#setting-the-initial-state */
 
     constructor( props ) {
         super( props )
         this.state = {
-            weather: undefined,
-            city: ''
+            book_data: undefined,
+            title: '',
         }
     }
-
 
     render() {
         return (
             <div className="App">
+
                 <div className="App-header">
-                    <h1>{ APP_TITLE }</h1>
+                    <h1>{ APP_TITLE } &nbsp; </h1>
                     <img src={ logo } className="App-logo" alt="logo" />
                 </div>
 
+
                 <div className="App-content">
+                    <body>
+                        <img alt="" className="book-img" />
+                    </body>
+
+
                     <div className="center-align">
+                        <form onSubmit={ this.fetchGoodreads } >
 
-                        <form onSubmit={ this.fetchWeather }>
-
-                            <div className="row" style={ { marginBottom: 0 } }>
-                                <div className="input-field col s6 offset-s3">
-                                    <input id="cityInput" type="text" value={ this.state.city } onChange={ this.handleChange } />
-                                    <label htmlFor="cityInput">City</label>
-                                </div>
+                            <div className="input-field col s6 offset-s3" >
+                                <label htmlFor="book_title">Books title</label>
+                                <input id="books_title" type="text" value={ this.state.title } onChange={ this.handleChange } />
                             </div>
 
-                            <button type="submit" className="waves-effect waves-light btn">
-                                Weather?
-                            </button>
+                            <button type="submit" className="waves-effect waves-red btn"> Find author</button>
 
                         </form>
-
+                    </div>
+                    <div className="row" style={ { marginTop: 50 } } >
+                        <div className="display info">{ this.displayBookData() }</div>
                     </div>
 
-                    <div className="row" style={ { marginTop: 20 } } >
-                        <div className="col s12 m6 offset-m3">
-                            { this.displayWeatherInfo() }
-                        </div>
-                    </div>
                 </div>
 
             </div>
+
         )
     }
 
-
-
     handleChange = ( event ) => {
         this.setState( {
-            city: event.target.value
-        })
+            title: event.target.value
+        } )
     }
 
 
     //method triggered by onSubmit event of the form or by onClick event of the "Weather?" button
     /* Arrow function syntax used for Autobinding, see details here : https://facebook.github.io/react/docs/react-without-es6.html#autobinding */
-    fetchWeather = async ( event ) => {
+    fetchGoodreads = async ( event ) => {
 
         event.preventDefault()
 
         /* ASYNC - AWAIT DOCUMENTATION : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Op%C3%A9rateurs/await */
 
         try {
-            let weather = await get( ENDPOINTS.WEATHER_API_URL, {
-                //YOU NEED TO PROVIDE YOUR "APIXU" API KEY HERE, see /utils/api.js file to grab the DOCUMENTATION file
-                key: undefined,
-                q: this.state.city
-            })
+            let book_data = await get( ENDPOINTS.GOODREADS_API_URL, {
+                //API key
+                key: 'uxOIB1nkggl5XWZ9SKPWzg',
+                //Query: the title of a book
+                q: this.state.title,
+            } )
 
-            //checking that we received a well-formated weather object
-            if ( weather.current ) {
-                //weather data is now received from the server thanks to async-await
-                let updatedWeatherWithImage = await this.fetchPicture( weather )
+            //data format JSON car format XML initiallement 
+            var dataJson = xmlToJSON.parseString( book_data, {
+                childrenAsArray: false
+            } )
 
-                /* React state DOCUMENTATION : https://facebook.github.io/react/docs/lifting-state-up.html */
-                this.setState( {
-                    weather: updatedWeatherWithImage
-                })
-            }
-            //handling error
+            var Ar = dataJson.GoodreadsResponse.search.results.work
+            if ( Ar.length > 1 )
+                this.setState(
+                    {
+                        book_data: dataJson.GoodreadsResponse.search.results.work
+                    }
+                )
             else {
-                console.log( weather )
-                //weather will contain an error object (see APIXU DOCUMENTATION)
-                Materialize.toast( weather.error.message, 8000, 'error-toast' )
-                //Using Materialize toast component to display error messages - see http://materializecss.com/dialogs.html
+                this.setState(
+                    {
+                        book_data: [ dataJson.GoodreadsResponse.search.results.work ]
+                    }
+                )
             }
-
-
         }
+
         catch ( error ) {
             Materialize.toast( error, 8000, 'error-toast' )
             console.log( 'Failed fetching data: ', error )
@@ -121,56 +118,37 @@ class App extends Component {
 
     }
 
-    //will fetch a picture with the name of the city fetched by the weather API
-    //will return an updated weather object (same object + one image)
-    fetchPicture = async ( weather ) => {
-        try {
-
-            const pictures = await get( ENDPOINTS.PIXABAY_API_URL, {
-                //YOU NEED TO PROVIDE YOUR "PIXABAY" API KEY HERE (see /utils/api.js file to grab the DOCUMENTATION link)
-                key: undefined,
-                q: weather.location.name + '+city',
-                image_type: 'all',
-                safesearch: true
-            })
-
-            //if we have results
-            if ( pictures.hits.length ) {
-                //saving the first picture of the results in our weather object
-                weather.pixabayPicture = pictures.hits[ 0 ].webformatURL
-            }
-            //else we save a defalut picture in our weather object
-            else {
-                weather.pixabayPicture = defaultPicture
-            }
-
-        }
-        //same default picture is saved if the image request fails
-        catch ( error ) {
-
-            weather.pixabayPicture = defaultPicture
-
-            Materialize.toast( error, 8000, 'error-toast' )
-            console.log( 'Failed fetching picture: ', error )
-        }
-
-        return weather
-    }
-
 
     //handle display of the received weather object
-    displayWeatherInfo = () => {
-        const weather = this.state.weather
+    displayBookData = () => {
+        const book_data = this.state.book_data
+        if ( book_data ) {
 
-        if ( weather ) {
-            return (
-                <WeatherCard data={ weather } />
-            )
+            return book_data.map( function ( book ) {
+
+                var a = book.best_book.author.name._text
+                var title = book.best_book.title._text
+                var pic = book.best_book.image_url._text
+                var average = [ book.average_rating._text ]
+
+                function filtred_average( average ) {
+                    if ( average >= 4.00 ) {
+                        return true;
+                    }
+                    average = null;
+                    return false;
+                }
+
+                var filtred_a = average.filter( filtred_average )
+                if ( filtred_a != false ) {
+                    return <GoodreadsCard title={ title } author={ a } picture={ pic } mark={ filtred_a } />
+                }
+
+            } )
+
         }
-
-        return null
     }
 
-}
+};
 
 export default App
